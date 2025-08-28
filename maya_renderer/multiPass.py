@@ -101,7 +101,7 @@ def arnold_render_beauty(cam):
     print("[OK] Wrote EXRs to:", out_dir or base_prefix)
     print(" - Beauty: .../beauty.exr")
 
-    
+
 def arnold_render_normals(cam):
     # Setting Arnold as main render
     if not cmds.pluginInfo("mtoa", q=True, loaded=True):
