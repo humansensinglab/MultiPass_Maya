@@ -1,64 +1,56 @@
-MultiPass for Maya
+🎬 MultiPass for Maya
 
-A Maya Python tool that automates multi-pass rendering with Arnold and generates camera metadata for pipelines.
-The UI lets you pick cameras, set resolution, adjust Arnold sampling, and choose which passes to render (Color, Normals, Depth, Camera Parameters).
+MultiPass is a Maya Python tool for automated Arnold multi-pass rendering.
+With a simple Qt UI, you can quickly configure cameras, resolution, Arnold samples, and decide which passes to render.
+It also exports camera metadata (CSV + JSON) for pipelines like COLMAP.
 
-Features
+✨ Features
 
-Camera Management: Add selected cameras from the scene.
+✅ Add selected cameras directly from your scene
+✅ Choose custom resolution (Width × Height)
+✅ Configure Arnold sampling (AA, Diffuse, Specular, Transmission, SSS)
+✅ Select which passes to render:
+   🎨 Color Image (PNG)
+   🟦 Normals (EXR)
+   ⚫ Depth (EXR)
+   📐 Camera Parameters (CSV + JSON)
+✅ Choose your output path — clean folder structure
+✅ Modern Qt UI (PySide6 / PySide2) integrated in Maya
 
-Resolution Control: Set custom width and height for renders.
+📦 Installation
 
-Arnold Setup: Configure AA, Diffuse, Specular, Transmission, and SSS samples.
-
-Selectable Passes:
-
-Color Image (PNG)
-
-Normals (EXR)
-
-Depth (EXR)
-
-Camera Parameters → CSV, intrinsics JSON, COLMAP extrinsics JSON
-
-Custom Output Path: Choose where rendered data and metadata are stored.
-
-Qt UI: Clean and simple PySide6/PySide2 interface integrated in Maya.
-
-Installation
-
-Clone or download this repo.
+Clone or download this repository.
 
 Copy the folder MultiPass into your Maya scripts directory:
 
 Documents/maya/2025/scripts/
 
 
-(Optional) Use the provided installer.bat to automate installation.
+(Optional) Run the included installer.bat for automatic setup.
 
-Usage
+🚀 Usage
 
-In Maya, open the Script Editor (Python tab) and run:
+In Maya, open the Script Editor (Python tab).
+
+Run:
 
 import MultiPass
 MultiPass.launch()
 
 
-The UI will appear.
-
 Workflow:
 
-Select cameras → click Add Selected Cameras.
+📷 Select your cameras → click Add Selected Cameras
 
-Set resolution and Arnold settings.
+📏 Set resolution and Arnold sampling
 
-Tick which passes you want.
+✅ Tick which passes you want
 
-Choose an output path.
+📂 Choose an output path
 
-Hit Render Images.
+▶️ Click Render Images
 
-Output Structure
+📂 Output Structure
 <chosen path>/
    └── <camera name>/
        ├── ColorImage/
@@ -71,26 +63,30 @@ Output Structure
        ├── camera_json.json
        └── colmap_camera_json.json
 
-Requirements
+⚙️ Requirements
 
 Autodesk Maya 2025 (tested)
 
-Arnold for Maya (mtoa plugin)
+Arnold for Maya (mtoa) plugin
 
 Python 3 (bundled with Maya)
 
 PySide6 or PySide2 (bundled with Maya)
 
-Notes
+📝 Notes
 
 Make sure Arnold (mtoa) is loaded in Maya.
 
-If reloading the UI doesn’t show changes, run:
+If the UI doesn’t update after edits, reload the module:
 
 import importlib, MultiPass
 importlib.reload(MultiPass)
 MultiPass.launch()
 
-License
+📸 Screenshots
 
-MIT License — feel free to use and adapt.
+(Add your UI screenshots here to show the tool in action!)
+
+📜 License
+
+MIT License — free to use and adapt.
