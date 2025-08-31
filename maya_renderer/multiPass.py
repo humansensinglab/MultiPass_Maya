@@ -61,9 +61,8 @@ def arnold_render_beauty(cam):
 
     # Ensure output folder exists
     base_prefix = path.replace("\\", "/")             
-    out_dir = os.path.dirname(base_prefix)
-    if out_dir and not os.path.exists(out_dir):
-        os.makedirs(out_dir)
+    if base_prefix and not os.path.exists(base_prefix):
+        os.makedirs(base_prefix)
 
     # Setting Arnold Atributes
     cmds.setAttr("defaultArnoldDriver.ai_translator", "png", type="string")
@@ -98,7 +97,7 @@ def arnold_render_beauty(cam):
         except Exception:
             pass
 
-    print("[OK] Wrote EXRs to:", out_dir or base_prefix)
+    print("[OK] Wrote EXRs to:", base_prefix)
     print(" - Beauty: .../beauty.exr")
 
 
@@ -126,9 +125,8 @@ def arnold_render_normals(cam):
 
     # Ensure output folder exists
     base_prefix = path.replace("\\", "/")              
-    out_dir = os.path.dirname(base_prefix)
-    if out_dir and not os.path.exists(out_dir):
-        os.makedirs(out_dir)
+    if base_prefix and not os.path.exists(base_prefix):
+        os.makedirs(base_prefix)
 
     # Setting Arnold Atributes
     cmds.setAttr("defaultArnoldDriver.ai_translator", "exr", type="string")
@@ -168,7 +166,7 @@ def arnold_render_normals(cam):
         except Exception:
             pass
 
-    print("[OK] Wrote EXRs to:", out_dir or base_prefix)
+    print("[OK] Wrote EXRs to:", base_prefix)
     print(" - Normals: .../N.exr")
     
 def arnold_render_depth(cam):
@@ -197,9 +195,8 @@ def arnold_render_depth(cam):
 
     # 2) Normalize path + ensure output folder exists
     base_prefix = path.replace("\\", "/")              # avoid \U unicode escapes
-    out_dir = os.path.dirname(base_prefix)
-    if out_dir and not os.path.exists(out_dir):
-        os.makedirs(out_dir)
+    if base_prefix and not os.path.exists(base_prefix):
+        os.makedirs(base_prefix)
 
     # 3) Driver + resolution (EXR for all, separate files per pass)
     cmds.setAttr("defaultArnoldDriver.ai_translator", "exr", type="string")
@@ -241,7 +238,7 @@ def arnold_render_depth(cam):
         except Exception:
             pass
 
-    print("[OK] Wrote EXRs to:", out_dir or base_prefix)
+    print("[OK] Wrote EXRs to:", base_prefix)
     print(" - Depth: .../z.exr")
     
 def render_all(do_color=True, do_normals=True, do_depth=True, do_params=True):
