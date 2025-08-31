@@ -96,10 +96,6 @@ MultiPass.launch()
     MultiPass.launch()
     ```
 
-## 📸 Screenshots
-
-(Add your UI screenshots here to show the tool in action!)
-
 ## 📜 License
 
 MIT License — free to use and adapt.
