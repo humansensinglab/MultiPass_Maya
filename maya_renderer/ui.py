@@ -1,9 +1,7 @@
-# ui.py
 import importlib
 import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
-# Qt compat: Maya 2025 uses PySide6
 try:
     from PySide6 import QtWidgets, QtCore, QtGui
     from shiboken6 import wrapInstance
@@ -11,25 +9,29 @@ except ImportError:
     from PySide2 import QtWidgets, QtCore
     from shiboken2 import wrapInstance
 
-from . import multiPass as MP  # ← relative import so the package resolves
-
+from . import multiPass as MP  
 _ui_instance = None
 
 
 class CameraUI:
+    
     def __init__(self):
+        
         self.window_object_name = "MultiPass_UI_v1"
         self._qt_window = None
 
     def is_alive(self):
+        
         return self._qt_window is not None and self._qt_window.isVisible()
 
     def raise_window(self):
+        
         if self._qt_window:
             self._qt_window.raise_()
             self._qt_window.activateWindow()
 
     def create_ui(self):
+        
         if cmds.window(self.window_object_name, exists=True):
             cmds.deleteUI(self.window_object_name)
 
@@ -47,70 +49,20 @@ class CameraUI:
         win.setAttribute(QtCore.Qt.WA_DeleteOnClose, True)
 
         # Central widget
+        
         central = QtWidgets.QWidget(win)
         main_layout = QtWidgets.QVBoxLayout(central)
         win.setCentralWidget(central)
 
-        # --- camera groups ---
-        # self.selected_cams_btn = QtWidgets.QPushButton("Save selected cameras")
-        # self.selected_cams_btn.setFixedHeight(28)
-        # main_layout.addWidget(self.selected_cams_btn)
-        # # self.selected_cams_btn.clicked.connect(self.cam_saver_btn)
-
-        # Text camera selection
+        # Camera save button
+        
         self.add_cams_btn = QtWidgets.QPushButton("Save selected cameras")
         self.add_cams_btn.setFixedHeight(28)
         main_layout.addWidget(self.add_cams_btn)
         self.add_cams_btn.clicked.connect(self.add_selected_cameras)    
+       
+        # Image resolution
         
-
-        # --- frames to render ---
-        # frame_txt = QtWidgets.QHBoxLayout()
-        # label_frames = QtWidgets.QLabel("Select frames to render:")
-        # frame_txt.addWidget(label_frames)
-        # main_layout.addLayout(frame_txt)
-
-        # start_fr = QtWidgets.QHBoxLayout()
-        # start_fr.addWidget(QtWidgets.QLabel("Start Frame: "))
-        # self.start_input = QtWidgets.QLineEdit()
-        # self.start_input.setPlaceholderText("Enter start frame here...")
-        # start_fr.addWidget(self.start_input)
-
-        # end_fr = QtWidgets.QHBoxLayout()
-        # end_fr.addWidget(QtWidgets.QLabel("End Frame: "))
-        # self.end_input = QtWidgets.QLineEdit()
-        # self.end_input.setPlaceholderText("Enter end frame here...")
-        # end_fr.addWidget(self.end_input)
-
-        # main_layout.addLayout(start_fr)
-        # main_layout.addLayout(end_fr)
-
-        # # --- image type (single choice) ---
-        # image_txt = QtWidgets.QHBoxLayout()
-        # image_txt.addWidget(QtWidgets.QLabel("Image type"))
-
-        # self.image_type_btn = QtWidgets.QToolButton()
-        # self.image_type_btn.setText("Select…")
-        # self.image_type_btn.setPopupMode(QtWidgets.QToolButton.InstantPopup)
-
-        # menu = QtWidgets.QMenu(self.image_type_btn)
-        # image_types = ["PNG", "JPEG", "EXR"]
-
-        # group = QtGui.QActionGroup(menu)  # from QtGui
-        # group.setExclusive(True)
-
-        # for label in image_types:
-        #     act = menu.addAction(label)
-        #     act.setCheckable(True)
-        #     group.addAction(act)
-
-        # self.image_type_btn.setMenu(menu)
-
-        # image_txt.addWidget(self.image_type_btn)
-        # image_txt.addStretch(1)
-        # main_layout.addLayout(image_txt)
-
-        # --- resolution ---
         res_txt = QtWidgets.QHBoxLayout()
         label_res = QtWidgets.QLabel("Choose an image resolution:")
         res_txt.addWidget(label_res)
@@ -136,6 +88,7 @@ class CameraUI:
         self.image_size()
 
         # Arnold Setup
+        
         title_arnold = QtWidgets.QLabel("Select Arnold Setup")
         main_layout.addWidget(title_arnold)
 
@@ -184,7 +137,8 @@ class CameraUI:
         main_layout.addLayout(sss)
         self.num_sss.valueChanged.connect(self.arnold_setup)
 
-        #Image tyoe to render
+        #Image type to render
+        
         img_type = QtWidgets.QLabel("Select Images to render")
         main_layout.addWidget(img_type)
 
@@ -212,7 +166,8 @@ class CameraUI:
         nrm_txt.addWidget(self.chk_normals)
         main_layout.addLayout(nrm_txt)
 
-        # --- camera poses checker ---
+        # Camera poses checker
+        
         chr_txt = QtWidgets.QHBoxLayout()
         label_chr = QtWidgets.QLabel("Camera parameters")
         chr_txt.addWidget(label_chr)
@@ -221,7 +176,8 @@ class CameraUI:
         chr_txt.addWidget(self.chk_params)
         main_layout.addLayout(chr_txt)
 
-        # --- path to save ---
+        # Image path saving
+        
         path_images_save = QtWidgets.QHBoxLayout()
         path_images_save.addWidget(QtWidgets.QLabel("Select a path to store data"))
 
@@ -235,7 +191,8 @@ class CameraUI:
         path_images_save.addWidget(btn_browse)
         main_layout.addLayout(path_images_save)
 
-        # --- render images button ---
+        # Render image button
+        
         render_btn = QtWidgets.QPushButton("Render Images")
         render_btn.setFixedHeight(28)
         main_layout.addWidget(render_btn)
@@ -246,11 +203,7 @@ class CameraUI:
         win.show()
         self._qt_window = win
         return win
-
-    # def cam_saver_btn(self):
-       
-    #    multiPass.camera_saver()
-    
+   
     def add_selected_cameras(self):
         from . import multiPass as MP
         MP.camera_list[:] = []        
@@ -263,8 +216,8 @@ class CameraUI:
         try:
             multiPass.width = int(self.width_input.text())
             multiPass.height = int(self.height_input.text())
+            
         except ValueError:
-            # fallback if inputs are empty or invalid
             multiPass.width = 1920
             multiPass.height = 1080
             
@@ -289,9 +242,7 @@ class CameraUI:
         )
                 
     def data_generation_path(self):
-        
-        # from . import multiPass
-        # start_pat = multiPass.path
+
         start_pat = MP.path
         
         folder = QtWidgets.QFileDialog.getExistingDirectory(
@@ -302,9 +253,7 @@ class CameraUI:
         
         if folder:
             folder = folder.replace("\\", "/")
-            # self.sshot_path_edit.setText(folder)
             self.data_saver_path.setText(folder)
-            # multiPass.path = folder 
             MP.path = folder
 
     def render(self):
@@ -316,6 +265,7 @@ class CameraUI:
         MP.render_all()
 
 def main():
+    
     global _ui_instance
     try:
         if _ui_instance and _ui_instance._qt_window:

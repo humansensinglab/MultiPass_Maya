@@ -32,11 +32,12 @@ def camera_saver():
         shapes = cmds.listRelatives(obj, shapes=True) or []
         for s in shapes:
             if cmds.nodeType(s) == "camera":
-                camera_list.append(obj)  # store transform name
+                camera_list.append(obj)  
                 print(obj)
     return camera_list
       
 def arnold_render_beauty(cam):
+    
     # Setting Arnold as main render
     if not cmds.pluginInfo("mtoa", q=True, loaded=True):
         cmds.loadPlugin("mtoa")
@@ -44,27 +45,13 @@ def arnold_render_beauty(cam):
     frame = int(cmds.getAttr("defaultRenderGlobals.startFrame"))  
     cmds.currentTime(frame, e=True)
     cmds.setAttr("defaultRenderGlobals.currentRenderer", "arnold", type="string")
-    
 
-    # Get selected cameras
-    # sel = cmds.ls(sl=True, type="transform") or []
-    # cam = None
-    # for s in sel:
-    #     for sh in (cmds.listRelatives(s, shapes=True) or []):
-    #         if cmds.nodeType(sh) == "camera":
-    #             cam = s
-    #             break
-    #     if cam:
-    #         break
-    # if not cam:
-    #     cmds.error("Select a camera transform first."); return
-
-    # Ensure output folder exists
+    # Check if output folder exists
     base_prefix = path.replace("\\", "/")             
     if base_prefix and not os.path.exists(base_prefix):
         os.makedirs(base_prefix)
 
-    # Setting Arnold Atributes
+    # Image settings
     cmds.setAttr("defaultArnoldDriver.ai_translator", "png", type="string")
     cmds.setAttr("defaultArnoldDriver.mergeAOVs", 0)
     cmds.setAttr("defaultArnoldDriver.append", 0) 
@@ -72,7 +59,6 @@ def arnold_render_beauty(cam):
     cmds.setAttr("defaultResolution.height", height)
 
     # File naming
-
     cmds.setAttr("defaultRenderGlobals.imageFilePrefix", base_prefix + "/" + cam + 
                  "/ColorImage/<RenderPass>.<Frame>", type="string")
 
@@ -97,11 +83,10 @@ def arnold_render_beauty(cam):
         except Exception:
             pass
 
-    print("[OK] Wrote EXRs to:", base_prefix)
-    print(" - Beauty: .../beauty.exr")
-
+    print("Color Image saved in:", base_prefix)
 
 def arnold_render_normals(cam):
+    
     # Setting Arnold as main render
     if not cmds.pluginInfo("mtoa", q=True, loaded=True):
         cmds.loadPlugin("mtoa")
@@ -110,25 +95,12 @@ def arnold_render_normals(cam):
     cmds.currentTime(frame, e=True)
     cmds.setAttr("defaultRenderGlobals.currentRenderer", "arnold", type="string")
 
-    # Get selected cameras
-    # sel = cmds.ls(sl=True, type="transform") or []
-    # cam = None
-    # for s in sel:
-    #     for sh in (cmds.listRelatives(s, shapes=True) or []):
-    #         if cmds.nodeType(sh) == "camera":
-    #             cam = s
-    #             break
-    #     if cam:
-    #         break
-    # if not cam:
-    #     cmds.error("Select a camera transform first."); return
-
-    # Ensure output folder exists
+    # Check if output folder exists
     base_prefix = path.replace("\\", "/")              
     if base_prefix and not os.path.exists(base_prefix):
         os.makedirs(base_prefix)
 
-    # Setting Arnold Atributes
+    # Image settings
     cmds.setAttr("defaultArnoldDriver.ai_translator", "exr", type="string")
     cmds.setAttr("defaultArnoldDriver.mergeAOVs", 0)
     cmds.setAttr("defaultResolution.width",  width)
@@ -144,8 +116,6 @@ def arnold_render_normals(cam):
     cmds.setAttr("defaultArnoldRenderOptions.GISpecularSamples", specular)
     cmds.setAttr("defaultArnoldRenderOptions.GITransmissionSamples", transmission)
     cmds.setAttr("defaultArnoldRenderOptions.GISssSamples", subsurface)
-    
-    
 
     # Adding N AOV
     AOVInterface().addAOV("N")
@@ -166,64 +136,46 @@ def arnold_render_normals(cam):
         except Exception:
             pass
 
-    print("[OK] Wrote EXRs to:", base_prefix)
-    print(" - Normals: .../N.exr")
+    print("Normals saved in:", base_prefix)
+
     
 def arnold_render_depth(cam):
-    # 0) Ensure Arnold is ready and current
+    
+    # 0)Setting Arnold as main render
     if not cmds.pluginInfo("mtoa", q=True, loaded=True):
         cmds.loadPlugin("mtoa")
     core.createOptions()
     frame = int(cmds.getAttr("defaultRenderGlobals.startFrame"))  
     cmds.currentTime(frame, e=True)
     cmds.setAttr("defaultRenderGlobals.currentRenderer", "arnold", type="string")
-    
-    # cmds.setAttr("defaultArnoldRenderOptions.outputs[0].enabled", 0)
 
-    # 1) Resolve selected camera transform
-    # sel = cmds.ls(sl=True, type="transform") or []
-    # cam = None
-    # for s in sel:
-    #     for sh in (cmds.listRelatives(s, shapes=True) or []):
-    #         if cmds.nodeType(sh) == "camera":
-    #             cam = s
-    #             break
-    #     if cam:
-    #         break
-    # if not cam:
-    #     cmds.error("Select a camera transform first."); return
-
-    # 2) Normalize path + ensure output folder exists
-    base_prefix = path.replace("\\", "/")              # avoid \U unicode escapes
+    # 2) Check if output folder exists
+    base_prefix = path.replace("\\", "/")              
     if base_prefix and not os.path.exists(base_prefix):
         os.makedirs(base_prefix)
 
-    # 3) Driver + resolution (EXR for all, separate files per pass)
+    # 3) Image settings
     cmds.setAttr("defaultArnoldDriver.ai_translator", "exr", type="string")
     cmds.setAttr("defaultArnoldDriver.mergeAOVs", 0)
     cmds.setAttr("defaultResolution.width",  width)
     cmds.setAttr("defaultResolution.height", height)
 
-    # 4) File prefix with <RenderPass> so beauty/N split into separate files
+    # 4) File naming
     cmds.setAttr("defaultRenderGlobals.imageFilePrefix", base_prefix + "/" + cam + 
                  "/Depth/<RenderPass>.<Frame>", type="string")
 
-    # 5) Arnold sampling
+    # 5) Arnold settings
     cmds.setAttr("defaultArnoldRenderOptions.AASamples", AA)
     cmds.setAttr("defaultArnoldRenderOptions.GIDiffuseSamples", diffuse)
     cmds.setAttr("defaultArnoldRenderOptions.GISpecularSamples", specular)
     cmds.setAttr("defaultArnoldRenderOptions.GITransmissionSamples", transmission)
     cmds.setAttr("defaultArnoldRenderOptions.GISssSamples", subsurface)
     
-    
-
     # 6) Add AOV Z
     AOVInterface().addAOV("Z")
-    
-    # cmds.setAttr("defaultArnoldDriver.mergeAOVs", 0)
     cmds.setAttr("defaultArnoldRenderOptions.aovMode", 1)
 
-    # 7) Render one frame
+    # 7) Render one frame and delete other images
     cmds.arnoldRender(cam=cam, w=width, h=height)
     
     depth_dir = (base_prefix + "/" + cam + "/Depth").replace("\\", "/")
@@ -238,8 +190,8 @@ def arnold_render_depth(cam):
         except Exception:
             pass
 
-    print("[OK] Wrote EXRs to:", base_prefix)
-    print(" - Depth: .../z.exr")
+    print("Depth saved in:", base_prefix)
+
     
 def render_all(do_color=True, do_normals=True, do_depth=True, do_params=True):
     for cam in camera_list:
@@ -253,12 +205,6 @@ def render_all(do_color=True, do_normals=True, do_depth=True, do_params=True):
             csv_creator(cam)
             intrinsics_json(cam)
             colmap_json(cam)
-
-def saver_test():
-    
-    file_path = os.path.join(data_path, f"camera.png").replace("\\", "/")
-    
-
 
 
 def main():

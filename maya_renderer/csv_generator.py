@@ -7,21 +7,27 @@ import numpy as np
 
 
 def quaternion_convert(cam):
-    # rotations from Maya are in degrees → convert to radians
+    
+    # Convert Maya rotation into Radians
+    
     rot_x = math.radians(cmds.getAttr(cam + ".rotateX"))
     rot_y = math.radians(cmds.getAttr(cam + ".rotateY"))
     rot_z = math.radians(cmds.getAttr(cam + ".rotateZ"))
+
+    # Get camera positions 
 
     pos_x = cmds.getAttr(cam + ".translateX")
     pos_y = cmds.getAttr(cam + ".translateY")
     pos_z = cmds.getAttr(cam + ".translateZ")
 
     # half-angles
+    
     cx = math.cos(rot_x * 0.5); sx = math.sin(rot_x * 0.5)
     cy = math.cos(rot_y * 0.5); sy = math.sin(rot_y * 0.5)
     cz = math.cos(rot_z * 0.5); sz = math.sin(rot_z * 0.5)
 
-    # quaternion (XYZ order)
+    # Get quaternions (XYZ order)
+    
     qw = cx*cy*cz + sx*sy*sz
     qx = sx*cy*cz - cx*sy*sz
     qy = cx*sy*cz + sx*cy*sz
@@ -31,6 +37,7 @@ def quaternion_convert(cam):
 
 
 def csv_creator(cam):
+    
     from . import multiPass as MP
     qw, qx, qy, qz, pos_x, pos_y, pos_z, _ = quaternion_convert(cam)
 
@@ -38,6 +45,8 @@ def csv_creator(cam):
     csv_path = MP.path.replace("\\", "/") + "/" + cam
     if not os.path.exists(csv_path):
         os.makedirs(csv_path)
+        
+    # Save CSV file
 
     full_path = os.path.join(csv_path, csv_name + ".csv")
     with open(full_path, mode="w", newline="") as f:
@@ -54,6 +63,9 @@ def intrinsics_json(cam):
     width = MP.width
     height = MP.height
 
+    # Get camera parameters
+    # Convert camera aperture from inches to mm
+    
     focal_length  = cmds.getAttr(cam + ".focalLength")
     sensor_width  = cmds.getAttr(cam + ".horizontalFilmAperture") * 25.4
     sensor_height = cmds.getAttr(cam + ".verticalFilmAperture") * 25.4
@@ -64,6 +76,8 @@ def intrinsics_json(cam):
     cy = height / 2
     s  = 0.0
 
+    # Intrinsics matrix
+    
     intrinsics = [
         float(fx), float(s), float(cx),
         0.0,       float(fy), float(cy),
@@ -75,6 +89,8 @@ def intrinsics_json(cam):
         "width":  int(width),
         "height": int(height)
     }
+
+    # Save JSON file
 
     json_path = MP.path.replace("\\", "/") + "/" + cam
     if not os.path.exists(json_path):
@@ -92,6 +108,7 @@ def colmap_json(cam):
     width = MP.width
     height = MP.height
 
+    # Get rotations(radians) and positions
     rx = math.radians(cmds.getAttr(cam + ".rotateX"))
     ry = math.radians(cmds.getAttr(cam + ".rotateY"))
     rz = math.radians(cmds.getAttr(cam + ".rotateZ"))
@@ -100,6 +117,8 @@ def colmap_json(cam):
     pos_y = cmds.getAttr(cam + ".translateY")
     pos_z = cmds.getAttr(cam + ".translateZ")
 
+    # Rotation matrices for each axis
+    
     Rx = np.array([[1, 0, 0],
                    [0, math.cos(rx), -math.sin(rx)],
                    [0, math.sin(rx),  math.cos(rx)]])
@@ -110,14 +129,20 @@ def colmap_json(cam):
                    [math.sin(rz),  math.cos(rz), 0],
                    [0,             0,            1]])
 
+    # Convert camera form Rc2w to Rw2c
+
     Rc2w = Rz @ Ry @ Rx
     Rw2c = Rc2w.T
 
     C = np.array([[pos_x],[pos_y],[pos_z]])
     t = -Rw2c @ C
 
+    # Build 3x4 extrinsic matrix [Rotation|translation]
+    
     extrinsic = np.hstack((Rw2c, t))
     data = {"extrinsics": extrinsic.tolist()}
+    
+    # Save JSON file
 
     json_path = MP.path.replace("\\", "/") + "/" + cam
     if not os.path.exists(json_path):
